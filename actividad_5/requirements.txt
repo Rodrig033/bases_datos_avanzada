@@ -1,0 +1,15 @@
+BTrees==6.5
+cffi==2.1.1
+persistent==6.8
+pycparser==3.0
+setuptools==84.0.0
+style==1.1.0
+transaction==5.1
+update==0.0.1
+zc.lockfile==4.0
+ZConfig==4.3
+ZODB==6.3
+zodbpickle==4.5
+zope.deferredimport==6.1.1
+zope.interface==8.6
+zope.proxy==7.3
