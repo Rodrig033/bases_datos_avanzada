@@ -3,6 +3,58 @@ from base_datos import ( abrir_base_datos, inicializar_base_datos, cerrar_base_d
 import transaction
 from datetime import datetime
 
+def generar_reporte(root):
+
+    total_libros = len(root.libros)
+
+    libros_prestados = sum(
+        1
+        for libro in root.libros.values()
+        if not libro.esta_disponible()
+    )
+
+    libros_disponibles = total_libros - libros_prestados
+
+    total_estudiantes = len(root.estudiantes)
+
+    total_autores = len(root.autores)
+
+    total_prestamos = len(root.prestamos)
+
+    prestamos_activos = sum(
+        1
+        for prestamo in root.prestamos.values()
+        if prestamo.esta_activo()
+    )
+
+    prestamos_devueltos = total_prestamos - prestamos_activos
+
+    print("\n========================================")
+    print("         REPORTE DE BIBLIOTECA")
+    print("========================================")
+
+    print("\nLIBROS")
+    print("----------------------------------------")
+    print(f"Total de libros: {total_libros}")
+    print(f"Disponibles: {libros_disponibles}")
+    print(f"Prestados: {libros_prestados}")
+
+    print("\nESTUDIANTES")
+    print("----------------------------------------")
+    print(f"Total de estudiantes: {total_estudiantes}")
+
+    print("\nAUTORES")
+    print("----------------------------------------")
+    print(f"Total de autores: {total_autores}")
+
+    print("\nPRÉSTAMOS")
+    print("----------------------------------------")
+    print(f"Total de préstamos: {total_prestamos}")
+    print(f"Activos: {prestamos_activos}")
+    print(f"Devueltos: {prestamos_devueltos}")
+
+    print("\n========================================")
+
 
 def main():
     
@@ -91,12 +143,11 @@ def main():
 
     # ---------------------------------- # Crear préstamos # ---------------------------------- 
 
-    prestamo1 = Prestamo("P001", libro12.isbn, estudiante1.matricula, datetime.now())
-    prestamo2 = Prestamo("P002", libro3.isbn, estudiante2.matricula, datetime.now())
-    prestamo3 = Prestamo("P003", libro1.isbn, estudiante3.matricula, datetime.now())
-    prestamo4 = Prestamo("P004", libro5.isbn, estudiante4.matricula, datetime.now())
-    prestamo5 = Prestamo("P005", libro6.isbn, estudiante5.matricula, datetime.now())
-
+    prestamo1 = Prestamo("P001", libro12, estudiante1, datetime.now())
+    prestamo2 = Prestamo("P002", libro3, estudiante2, datetime.now())
+    prestamo3 = Prestamo("P003", libro1, estudiante3, datetime.now())
+    prestamo4 = Prestamo("P004", libro5, estudiante4, datetime.now())
+    prestamo5 = Prestamo("P005", libro6, estudiante5, datetime.now())
 
     # Registrar devolución del préstamo 2
     prestamo2.registrar_devolucion(datetime.now())
@@ -288,8 +339,71 @@ def main():
                 "-",
                 libro.anio
             )
-        
+    # Consulta 11.registro con nombre del alumno y el título del libro prestado
+    print("\n===================================")
+    print("CONSULTA 11: PRÉSTAMOS CON ALUMNO Y LIBRO")
+    print("===================================")
 
+    for prestamo in root.prestamos.values():
+
+        print(
+            "Préstamo:", prestamo.id_prestamo,
+            "| Alumno:", prestamo.estudiante.nombre,
+            "| Libro:", prestamo.libro.titulo
+        )            
+        
+    # Consulta 12. Registro de todos los prestamos de un alumno: 
+    print("\n===================================")
+    print("CONSULTA 12: PRÉSTAMOS DE UN ALUMNO")
+    print("===================================")
+
+    matricula_busqueda = "A001"
+
+    if matricula_busqueda in root.estudiantes:
+
+        estudiante = root.estudiantes[matricula_busqueda]
+
+        print("Alumno:", estudiante.nombre)
+        print("Matrícula:", estudiante.matricula)
+
+        for prestamo in root.prestamos.values():
+
+            if prestamo.estudiante.matricula == matricula_busqueda:
+
+                print(
+                    "Préstamo:", prestamo.id_prestamo,
+                    "| Libro:", prestamo.libro.titulo,
+                    "| Estado:", prestamo.estado
+                )
+
+    else:
+        print("Estudiante no encontrado.") 
+
+    # Libros prestados actualmente:
+    print("\n===================================")
+    print("CONSULTA 13: LIBROS ACTUALMENTE PRESTADOS")
+    print("===================================")
+
+    for libro in root.libros.values():
+
+        if not libro.esta_disponible():
+
+            print(
+                "ISBN:", libro.isbn,
+                "| Título:", libro.titulo,
+                "| Prestado a:",
+                next(
+                    (
+                        prestamo.estudiante.nombre
+                        for prestamo in root.prestamos.values()
+                        if prestamo.libro.isbn == libro.isbn
+                        and prestamo.esta_activo()
+                    ),
+                    "Desconocido"
+                )
+            )
+
+        generar_reporte(root)
         cerrar_base_datos(db, connection)
 
 

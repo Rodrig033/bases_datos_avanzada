@@ -1,9 +1,10 @@
 from persistent import Persistent
 from datetime import datetime
 
+
 class Autor(Persistent):
 
-    def __init__(self,id_autor: str, nombre: str, nacionalidad: str):
+    def __init__(self, id_autor: str, nombre: str, nacionalidad: str):
         self.id_autor = id_autor
         self.nombre = nombre
         self.nacionalidad = nacionalidad
@@ -14,7 +15,7 @@ class Autor(Persistent):
 
 class Libro(Persistent):
 
-    def __init__(self, isbn: str, titulo:str, anio: int, categoria: str, autor: list[Autor]):
+    def __init__(self, isbn: str, titulo: str, anio: int, categoria: str, autor: Autor):
         self.isbn = isbn
         self.titulo = titulo
         self.anio = anio
@@ -23,23 +24,23 @@ class Libro(Persistent):
         self.disponible = True
 
     def prestar(self) -> bool:
+
         if not self.disponible:
             return False
 
         self.disponible = False
         return True
 
-
     def devolver(self) -> bool:
 
+        if self.disponible:
+            return False
+
         self.disponible = True
-
         return True
-
 
     def esta_disponible(self) -> bool:
         return self.disponible
-
 
 
 class Estudiante(Persistent):
@@ -50,13 +51,24 @@ class Estudiante(Persistent):
         self.carrera = carrera
         self.correo = correo
 
-
     def mostrar_info(self) -> str:
-        return f"Nombre: {self.nombre}, matricula: {self.matricula}, carrera: {self.carrera}"
+        return (
+            f"Nombre: {self.nombre}, "
+            f"matricula: {self.matricula}, "
+            f"carrera: {self.carrera}"
+        )
+
 
 class Prestamo(Persistent):
 
-    def __init__(self, id_prestamo: str, libro: str, estudiante: str, fecha_prestamo: datetime):
+    def __init__(
+        self,
+        id_prestamo: str,
+        libro: Libro,
+        estudiante: Estudiante,
+        fecha_prestamo: datetime
+    ):
+
         self.id_prestamo = id_prestamo
         self.libro = libro
         self.estudiante = estudiante
@@ -64,9 +76,16 @@ class Prestamo(Persistent):
         self.fecha_devolucion = None
         self.estado = "Activo"
 
+        # Al crear el préstamo, el libro queda prestado
+        self.libro.prestar()
+
     def registrar_devolucion(self, fecha: datetime) -> str:
+
         self.fecha_devolucion = fecha
         self.estado = "Devuelto"
+
+        # Al devolver el préstamo, el libro vuelve a estar disponible
+        self.libro.devolver()
 
         return self.estado
 
@@ -74,9 +93,12 @@ class Prestamo(Persistent):
         return self.estado == "Activo"
 
     def mostrar_info(self):
+
         print(f"ID del préstamo: {self.id_prestamo}")
-        print(f"ISBN del libro: {self.libro}")
-        print(f"Matrícula del estudiante: {self.estudiante}")
+        print(f"Libro: {self.libro.titulo}")
+        print(f"ISBN: {self.libro.isbn}")
+        print(f"Alumno: {self.estudiante.nombre}")
+        print(f"Matrícula: {self.estudiante.matricula}")
         print(f"Fecha de préstamo: {self.fecha_prestamo}")
         print(f"Fecha de devolución: {self.fecha_devolucion}")
         print(f"Estado: {self.estado}")
