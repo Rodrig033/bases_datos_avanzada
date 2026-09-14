@@ -1,4 +1,4 @@
-from modelos import ( Autor, Libro, Estudiante, Prestamo ) 
+from Tienda.modelos import ( Autor, Libro, Estudiante, Prestamo ) 
 from base_datos import ( abrir_base_datos, inicializar_base_datos, cerrar_base_datos )
 import transaction
 from datetime import datetime
